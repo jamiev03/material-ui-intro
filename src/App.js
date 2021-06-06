@@ -14,30 +14,16 @@ import { makeStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
 import Link from "@material-ui/core/Link";
 
-// const people = [
-//   {
-//     name: 'James',
-//     age: 31,
-//   },
-//   {
-//     name: 'John',
-//     age: 45,
-//   },
-//   {
-//     name: 'Paul',
-//     age: 65,
-//   },
-//   {
-//     name: 'Ringo',
-//     age: 49,
-//   },
-//   {
-//     name: 'George',
-//     age: 34,
-//   }
-// ];
+const useStyles = makeStyles((theme) => ({
+  container: {
+    backgroundColor: theme.palette.background.paper,
+    padding: theme.spacing(8, 0, 6)
+  }
+}))
 
 function App() {
+  const classes = useStyles();
+  
   return (
     <>
       {/* sets base css */}
@@ -49,7 +35,7 @@ function App() {
         </Toolbar>
       </AppBar>
       <main>
-        <div>
+        <div className={classes.container}>
           <Container maxWidth='sm'>
             <Typography variant='h2' align='center' color='textPrimary' gutterBottom>Photo Album</Typography>
             <Typography variant='h5' align='center' color='textSecondary' paragraph>
