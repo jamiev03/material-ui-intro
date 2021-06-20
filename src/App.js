@@ -1,88 +1,198 @@
 import "./App.css";
+import React, { useState, useEffect } from "react";
+import SavedCoins from "./components/SavedCoins";
+import CoinList from "./components/CoinList";
 import AppBar from "@material-ui/core/AppBar";
 import Button from "@material-ui/core/Button";
 import CameraIcon from "@material-ui/icons/PhotoCamera";
-import Card from "@material-ui/core/Card";
-import CardActions from "@material-ui/core/CardActions";
-import CardContent from "@material-ui/core/CardContent";
-import CardMedia from "@material-ui/core/CardMedia";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import Grid from "@material-ui/core/Grid";
 import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
+import PropTypes from 'prop-types';
 import Container from "@material-ui/core/Container";
-import Link from "@material-ui/core/Link";
-import useStyles from './Styles';
+import useStyles from "./components/Styles";
+import { TextField } from "@material-ui/core";
+import Loading from './components/Loading';
 
-const cards = [1, 2,3,4,5,6,7,8,9];
+const cryptoPrices =
+  "https://api.coingecko.com/api/v3/coins/markets?vs_currency=cad&order=market_cap_desc&per_page=24&page=1&sparkline=false";
 
 function App() {
   const classes = useStyles();
+  const [loading, setLoading] = useState(true);
+  const [coins, setCoins] = useState([]);
+  const [search, setSearch] = useState("");
+  const [savedCoins, setSavedCoins] = useState([]);
+
+  const fetchCoins = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(cryptoPrices);
+      const coins = await response.json();
+      setCoins(coins);
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCoins();
+  }, []);
+
+  const inputTextHandler = (event) => {
+    setSearch(event.target.value);
+  };
+
+  const refreshCoins = () => {
+    fetchCoins();
+    setSearch("");
+  };
+
+  const filteredCoins = coins.filter((coin) =>
+    coin.name.toLowerCase().includes(search.toLocaleLowerCase())
+  );
+
+    if (loading) {
+    return (
+      <>
+        <Loading />
+      </>
+    );
+  }
 
   return (
     <>
-      {/* sets base css */}
       <CssBaseline />
       <AppBar position="relative">
         <Toolbar>
-          <CameraIcon className={classes.icon}/>
-          <Typography variant="h6">Photo Album</Typography>
+          <CameraIcon className={classes.icon} />
+          <Typography variant="h6" color="inherit" noWrap>
+            Crypto Coins
+          </Typography>
         </Toolbar>
       </AppBar>
       <main>
-        <div className={classes.container}>
-          <Container maxWidth='sm'>
-            <Typography variant='h2' align='center' color='textPrimary' gutterBottom>Photo Album</Typography>
-            <Typography variant='h5' align='center' color='textSecondary' paragraph>
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Fuga laborum illum molestias sunt expedita dolores, deleniti tempore quia consequuntur sit culpa accusamus laudantium repellendus quos perspiciatis magnam ullam veniam asperiores.
+        {/* Hero unit */}
+        <div className={classes.heroContent}>
+          <Container maxWidth="sm">
+            <Typography
+              component="h1"
+              variant="h2"
+              align="center"
+              color="textPrimary"
+              gutterBottom
+            >
+              Crypto Coins
             </Typography>
-            <div className={classes.buttons}>
-              <Grid container spacing={3} justify='center'>
+            <Typography
+              variant="h5"
+              align="center"
+              color="textSecondary"
+              paragraph
+            >
+              Search TOP 100 Crypto Currencies
+            </Typography>
+            <div className={classes.heroButtons}>
+              <Grid container spacing={2} justify="center">
+                <form
+                  className={classes.root}
+                  noValidate
+                  autoComplete="off"
+                  onChange={inputTextHandler}
+                >
+                  <TextField
+                    id="standard-basic"
+                    label="Search coin"
+                    value={search}
+                  />
+                </form>
                 <Grid item>
-                     <Button variant='contained' color='primary'>See Photos</Button>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={refreshCoins}
+                  >
+                    Refresh List
+                  </Button>
                 </Grid>
-                <Grid item>
-                     <Button variant='outlined' color='primary'>More Photos</Button>
-                </Grid>
+              </Grid>
+              <Grid item>
+                <SavedCoins
+                  savedCoins={savedCoins}
+                  setSavedCoins={setSavedCoins}
+                  coins={coins}
+                />
               </Grid>
             </div>
           </Container>
         </div>
-        <Container className={classes.cardGrid} maxWidth='md'>
+        <Container className={classes.cardGrid} maxWidth="md">
+          {/* End hero unit */}
           <Grid container spacing={4}>
-          {cards.map((card) => (
-             <Grid item key={card} xs={12} sm={6} md={4}>
-             <Card className={classes.card}>
-               <CardMedia 
-               className={classes.cardMedia}
-               image='https://source.unsplash.com/random'
-               title='image title'
-               />
-               <CardContent className={classes.cardContent}>
-                 <Typography gutterBottom variant='h5'>
-                   Heading
-                 </Typography>
-                 <Typography>
-                 Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas odit, amet incidunt ea et molestias.
-                 </Typography>
-               </CardContent>
-               <CardActions>
-                 <Button size='small' color='primary'>View</Button>
-                 <Button size='small' color='primary'>Edit</Button>
-               </CardActions>
-             </Card>
-           </Grid>
+            {filteredCoins.map((coin) => (
+              <CoinList
+                name={coin.name}
+                symbol={coin.symbol}
+                coins={coins}
+                setCoins={setCoins}
+                coin={coin}
+                id={coin.id}
+                key={coin.id}
+                current_price={coin.current_price}
+                image={coin.image}
+                price_change={coin.price_change_percentage_24h}
+                savedCoins={savedCoins}
+                setSavedCoins={setSavedCoins}
+              />
             ))}
           </Grid>
         </Container>
       </main>
+      {/* Footer */}
       <footer className={classes.footer}>
-            <Typography variant='h5' align='center' gutterBottom>
-              Footer
-            </Typography>
+        <Typography variant="h6" align="center" gutterBottom>
+          Footer
+        </Typography>
+        <Typography
+          variant="subtitle1"
+          align="center"
+          color="textSecondary"
+          component="p"
+        >
+          Something here to give the footer a purpose!
+        </Typography>
       </footer>
     </>
+
+    // <>
+    //   <h1>Crypto Currencies</h1>
+    //   <button onClick={refreshCoins}>Refresh</button>
+    //   <SavedCoins savedCoins={savedCoins} setSavedCoins={setSavedCoins} coins={coins}/>
+    //   <form>
+    //     <input type="text" placeholder="Search" onChange={inputTextHandler} />
+    //   </form>
+    //   {filteredCoins.map((coin) => (
+    //     <CoinList
+    //       name={coin.name}
+    //       symbol={coin.symbol}
+    //       coins={coins}
+    //       setCoins={setCoins}
+    //       coin={coin}
+    //       id={coin.id}
+    //       key={coin.id}
+    //       savedCoins={savedCoins}
+    //       setSavedCoins={setSavedCoins}
+    //     />
+    //   ))}
+    // </>
   );
 }
+
+App.propTypes = {
+  classes: PropTypes.any
+};
 
 export default App;
