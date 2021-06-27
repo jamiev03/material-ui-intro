@@ -154,7 +154,7 @@ function App() {
       {/* Footer */}
       <footer className={classes.footer}>
         <Typography variant="h6" align="center" gutterBottom>
-          Footer
+          Thanks for stopping by!
         </Typography>
         <Typography
           variant="subtitle1"
@@ -162,7 +162,7 @@ function App() {
           color="textSecondary"
           component="p"
         >
-          Something here to give the footer a purpose!
+         Crypto currency price feed app with current prices, percentage gain/loss and symbol.
         </Typography>
       </footer>
     </>
